@@ -1,62 +1,49 @@
+import "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
-import { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
   TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
+import { useFonts } from "expo-font";
+import { createStackNavigator } from "@react-navigation/stack";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 
-import { RegistrationScreen } from "./Screens/RegistrationScreen";
-import { LoginScreen } from "./Screens/LoginScreen.js";
+import { store, persistor } from "./redux/store";
+import Main from "./components/Main";
 
 export default function App() {
-  const [isReady, setIsReady] = useState(false);
-  const [keyboardShown, setKeyboardShown] = useState(false);
-
-  Keyboard.addListener("keyboardDidShow", () => {
-    setKeyboardShown(true);
-  });
-  Keyboard.addListener("keyboardDidHide", () => {
-    setKeyboardShown(false);
+  const [fontsLoaded] = useFonts({
+    "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
+    "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
+    "Roboto-Bold": require("./assets/fonts/Roboto-Bold.ttf"),
   });
 
-  const hideKeyboard = () => {
-    Keyboard.dismiss();
-  };
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
-    <View style={styles.container}>
-      <TouchableWithoutFeedback onPress={hideKeyboard}>
-        <ImageBackground
-          source={require("./assets/bg2x.jpg")}
-          style={styles.bgImage}
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <TouchableWithoutFeedback
+          style={{ flex: 1 }}
+          onPress={() => Keyboard.dismiss()}
         >
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-          >
-            {/* <LoginScreen keyboardShown={keyboardShown} /> */}
-            <RegistrationScreen keyboardShown={keyboardShown} />
+          <View style={styles.container}>
+            <Main />
             <StatusBar style="auto" />
-          </KeyboardAvoidingView>
-        </ImageBackground>
-      </TouchableWithoutFeedback>
-    </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </PersistGate>
+    </Provider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-  },
-
-  bgImage: {
-    flex: 1,
-    resizeMode: "cover",
-    justifyContent: "flex-end",
   },
 });
